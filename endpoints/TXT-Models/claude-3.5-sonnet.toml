@@ -1,0 +1,27 @@
+id = "claude-3.5-sonnet"
+label = "Claude 3.5 Sonnet"
+category = "TXT"
+platform = "openrouter"
+endpoint = "anthropic/claude-3.5-sonnet"
+description = "Anthropic's Claude 3.5 Sonnet for text generation and prompt refinement."
+
+[pricing]
+type = "real_time"
+input = 3.00
+output = 15.00
+currency = "USD per 1M tokens"
+
+[params.temperature]
+label = "Temperature"
+type = "number"
+default = 0.5
+min = 0.0
+max = 2.0
+step = 0.1
+
+[params.max_tokens]
+label = "Max Output Tokens"
+type = "integer"
+default = 4096
+min = 1
+max = 200000

@@ -1,0 +1,27 @@
+id = "deepseek-v3"
+label = "DeepSeek V3"
+category = "TXT"
+platform = "openrouter"
+endpoint = "deepseek/deepseek-chat"
+description = "DeepSeek V3 chat model. Cost-effective for various text tasks."
+
+[pricing]
+type = "real_time"
+input = 0.27
+output = 1.10
+currency = "USD per 1M tokens"
+
+[params.temperature]
+label = "Temperature"
+type = "number"
+default = 0.5
+min = 0.0
+max = 2.0
+step = 0.1
+
+[params.max_tokens]
+label = "Max Output Tokens"
+type = "integer"
+default = 4096
+min = 1
+max = 200000

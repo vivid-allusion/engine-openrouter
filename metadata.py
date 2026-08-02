@@ -1,0 +1,5 @@
+PROVIDER_NAME = "OpenRouter"
+PROVIDER_HOMEPAGE = "https://openrouter.ai"
+PLATFORM = "openrouter"
+API_KEY_ENV_VAR = "OPENROUTER_API_KEY"
+API_KEY_PATTERN = r"^sk-or-[A-Za-z0-9-]{20,}$"
