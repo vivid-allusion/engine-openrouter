@@ -1,6 +1,6 @@
 import json
 import os
-import uuid
+from datetime import datetime
 from pathlib import Path
 
 from .datatypes import EngineError, InputFile, OutputFile, ProgressEvent
@@ -75,7 +75,8 @@ class Engine:
                         media_type=media_type,
                     )
                 else:
-                    dest = self._output_dir / f"{uuid.uuid4().hex[:12]}.txt"
+                    ts = datetime.now().strftime("%y%m%d_%H%M%S")
+                    dest = self._output_dir / f"{ts}-{item.path.stem}-{idx}.txt"
                     dest.write_text(content, encoding="utf-8")
                     output = OutputFile(
                         bullet_path=item.path,
@@ -97,7 +98,7 @@ class Engine:
         return results
 
     def _validate_preflight(self):
-        if "endpoint" not in self._profile:
+        if not self._profile.get("endpoint"):
             raise EngineError("Missing 'endpoint' in profile")
         try:
             from openai import OpenAI  # noqa: F401
