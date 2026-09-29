@@ -45,11 +45,11 @@ class Engine:
         total = len(inputs)
 
         for idx, item in enumerate(inputs):
-            self._emit(f"Processing bullet {idx + 1}/{total}...")
+            self._emit(f"Processing Markdown file {idx + 1}/{total}...")
             prompt = f"{self._prefix}{item.prompt}{self._suffix}".strip()
             if not prompt:
                 output = OutputFile(
-                    bullet_path=item.path,
+                    source_path=item.path,
                     status="error",
                     error_msg="Empty prompt after applying prefix/suffix",
                     media_type=media_type,
@@ -69,7 +69,7 @@ class Engine:
                 content = completion.choices[0].message.content
                 if not content:
                     output = OutputFile(
-                        bullet_path=item.path,
+                        source_path=item.path,
                         status="error",
                         error_msg="No content returned from OpenRouter",
                         media_type=media_type,
@@ -79,7 +79,7 @@ class Engine:
                     dest = self._output_dir / f"{ts}-{item.path.stem}-{idx}.txt"
                     dest.write_text(content, encoding="utf-8")
                     output = OutputFile(
-                        bullet_path=item.path,
+                        source_path=item.path,
                         path=dest,
                         status="ok",
                         media_type=media_type,
@@ -87,7 +87,7 @@ class Engine:
 
             except Exception as exc:
                 output = OutputFile(
-                    bullet_path=item.path,
+                    source_path=item.path,
                     status="error",
                     error_msg=str(exc),
                     media_type=media_type,
