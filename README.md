@@ -2,7 +2,7 @@
 
 Engine wrapping the [OpenRouter](https://openrouter.ai) API via the
 OpenAI-compatible SDK behind studiolot's uniform Engine interface.
-Vehicles call this Engine instead of importing the OpenAI SDK directly.
+Generators call this Engine instead of importing the OpenAI SDK directly.
 OpenRouter routes to 300+ LLM and vision models (Claude, ChatGPT, Gemini,
 DeepSeek, etc.) through a single API.
 
