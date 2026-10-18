@@ -33,10 +33,17 @@ class Engine:
 
         from openai import OpenAI
 
-        client = OpenAI(
-            base_url="https://openrouter.ai/api/v1",
-            api_key=self._resolve_api_key(),
-        )
+        if self._concurrency > 1:
+            client = OpenAI(
+                base_url="https://openrouter.ai/api/v1",
+                api_key=self._resolve_api_key(),
+                max_retries=0,
+            )
+        else:
+            client = OpenAI(
+                base_url="https://openrouter.ai/api/v1",
+                api_key=self._resolve_api_key(),
+            )
         endpoint = self._profile["endpoint"]
         params = dict(self._profile.get("parameters", {}))
         media_type = self._profile.get("media_type", "")
@@ -45,7 +52,7 @@ class Engine:
         if self._concurrency > 1:
             from . import runner
 
-            return runner.run_batch(self, inputs)
+            return runner.run_batch(self, inputs, client)
 
         results: list[OutputFile] = []
         total = len(inputs)
