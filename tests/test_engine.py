@@ -220,7 +220,8 @@ class TestEngineRun:
             mock_client = MagicMock()
 
             def side_effect(**kwargs):
-                idx = kwargs.get("_idx", 0)
+                side_effect.calls = getattr(side_effect, "calls", 0) + 1
+                idx = side_effect.calls - 1
                 if idx == 1:
                     raise RuntimeError("fail")
                 mock_choice = MagicMock()
