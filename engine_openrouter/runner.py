@@ -8,29 +8,11 @@ one failing item never disturbs jobs still in flight.
 """
 
 import concurrent.futures
-import threading
 
 from .datatypes import OutputFile
 
 
-class BatchState:
-    def __init__(self):
-        self._stop = False
-        self._lock = threading.Lock()
-
-    def is_stopped(self) -> bool:
-        with self._lock:
-            return self._stop
-
-    def halt(self):
-        with self._lock:
-            self._stop = True
-
-    def note_success(self):
-        pass
-
-
-def run_item(engine, client, item, idx, total, state) -> list[OutputFile]:
+def run_item(engine, client, item, idx, total) -> list[OutputFile]:
     media_type = engine._profile.get("media_type", "")
     engine._emit(f"Processing Markdown file {idx + 1}/{total}...")
     prompt = f"{engine._prefix}{item.prompt}{engine._suffix}".strip()
@@ -61,9 +43,8 @@ def run_item(engine, client, item, idx, total, state) -> list[OutputFile]:
                     status="error",
                     error_msg="No content returned from OpenRouter",
                     media_type=media_type,
-                )
+            )
             ]
-        state.note_success()
         ts = engine._now_string()
         dest = engine._output_dir / f"{ts}-{item.path.stem}-{idx}.txt"
         dest.write_text(content, encoding="utf-8")
@@ -94,21 +75,16 @@ def run_batch(engine, inputs) -> list[OutputFile]:
         api_key=engine._resolve_api_key(),
     )
 
-    state = BatchState()
     results: list[list[OutputFile] | None] = [None] * len(inputs)
     inflight_cap = max(1, engine._concurrency)
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=inflight_cap) as pool:
         pending: dict[concurrent.futures.Future, int] = {}
         next_idx = 0
-        while pending or (next_idx < len(inputs) and not state.is_stopped()):
-            while (
-                not state.is_stopped()
-                and next_idx < len(inputs)
-                and len(pending) < inflight_cap
-            ):
+        while next_idx < len(inputs) or pending:
+            while next_idx < len(inputs) and len(pending) < inflight_cap:
                 future = pool.submit(
-                    run_item, engine, client, inputs[next_idx], next_idx, len(inputs), state
+                    run_item, engine, client, inputs[next_idx], next_idx, len(inputs)
                 )
                 pending[future] = next_idx
                 next_idx += 1
