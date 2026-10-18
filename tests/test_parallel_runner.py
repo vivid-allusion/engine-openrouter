@@ -158,3 +158,25 @@ class TestParallelRunner:
             engine = Engine(base_profile(concurrency=0), tmp_path)
             with pytest.raises(EngineError, match="concurrency"):
                 engine.run([])
+
+    def test_retryable_failures_trip_breaker_and_leave_unstarted_absent(self, tmp_path):
+        def limited(model=None, messages=None, **kwargs):
+            error = RuntimeError("429 Too Many Requests")
+            error.status_code = 429
+            raise error
+
+        results, progress, client = run_engine(
+            base_profile(
+                concurrency=2,
+                retry_on_429=0,
+                circuit_breaker_max=2,
+            ),
+            tmp_path,
+            limited,
+            n=6,
+        )
+        calls = client.chat.completions.create.call_count
+        assert calls <= 3
+        assert len(results) == calls
+        assert all(result.status == "error" for result in results)
+        assert any("Circuit breaker tripped" in str(event) for event in progress)
